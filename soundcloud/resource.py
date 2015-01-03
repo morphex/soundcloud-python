@@ -49,7 +49,15 @@ def wrapped_resource(response):
     dicts will be returned as a ```Resource``` instance.
     """
     # decode response text
-    response_content = response.content.decode(response.encoding)
+    try:
+        response_content = response.content.decode(response.encoding)
+    except:
+        if response.headers['content-disposition'].startswith('attachment;filename='):
+            filename = response.headers['content-disposition'][len('attachment;filename='):]
+            filename = filename[1:-1]
+            return filename, response.content
+        else:
+            raise
 
     try:
         content = json.loads(response_content)
